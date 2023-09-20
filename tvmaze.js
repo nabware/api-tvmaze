@@ -3,6 +3,9 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
+const BASE_URL = "http://api.tvmaze.com";
+const MISSING_IMAGE = "https://tinyurl.com/tv-missing";
+// add base URL global const
 
 
 /** Given a search term, search for tv shows that match that query.
@@ -13,38 +16,23 @@ const $searchForm = $("#searchForm");
  */
 
 async function getShowsByTerm(query) {
-  const params = new URLSearchParams({q: query});
-  const response = await fetch(`http://api.tvmaze.com/search/shows?${params}`);
-  const responseObj = await response.json();
-  const shows = [];
+  const params = new URLSearchParams({ q: query });
+  const response = await fetch(`${BASE_URL}/search/shows?${params}`);
+  const data = await response.json();
 
-  console.log(responseObj)
+  console.log(data);
 
-  for (let {id, name, summary, image} of responseObj.show) {
-    shows.push({id, name, summary, image: "https://tinyurl.com/tv-missing"});
-  }
+  const shows = data.map(show => {
+              let { id, name, summary, image } = show.show;
+
+              return { id, name, summary, image: (image?.original || MISSING_IMAGE) };
+
+  });
 
   console.log(shows);
 
   return shows;
-  return [
-    {
-      id: 1767,
-      name: "The Bletchley Circle",
-      summary:
-        `<p><b>The Bletchley Circle</b> follows the journey of four ordinary
-           women with extraordinary skills that helped to end World War II.</p>
-         <p>Set in 1952, Susan, Millie, Lucy and Jean have returned to their
-           normal lives, modestly setting aside the part they played in
-           producing crucial intelligence, which helped the Allies to victory
-           and shortened the war. When Susan discovers a hidden code behind an
-           unsolved murder she is met by skepticism from the police. She
-           quickly realises she can only begin to crack the murders and bring
-           the culprit to justice with her former friends.</p>`,
-      image:
-          "http://static.tvmaze.com/uploads/images/medium_portrait/147/369403.jpg"
-    }
-  ]
+
 }
 
 
@@ -61,8 +49,8 @@ function displayShows(shows) {
         <div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg"
-              alt="Bletchly Circle San Francisco"
+              src="${show.image}"
+              alt="${show.name}"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
@@ -92,7 +80,7 @@ async function searchShowsAndDisplay() {
   displayShows(shows);
 }
 
-$searchForm.on("submit", async function handleSearchForm (evt) {
+$searchForm.on("submit", async function handleSearchForm(evt) {
   evt.preventDefault();
   await searchShowsAndDisplay();
 });
