@@ -46,7 +46,7 @@ function displayShows(shows) {
 
   for (const show of shows) {
     const $show = $(`
-        <div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+        <div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4 show-container">
          <div class="media">
            <img
               src="${show.image}"
@@ -94,10 +94,9 @@ async function getEpisodesOfShow(id) {
   const response = await fetch(`${BASE_URL}/shows/${id}/episodes`);
   const data = await response.json();
 
-  return data.map(episode => {
-    const { id, name, season, number } = episode;
-    return { id, name, season, number };
-  });
+  //TODO: destructure episode param
+
+  return data.map(({ id, name, season, number }) => ({ id, name, season, number }));
 }
 
 /** Takes in an array of episodes,
@@ -107,36 +106,27 @@ async function getEpisodesOfShow(id) {
 function displayEpisodes(episodes) {
   $episodesArea.css("display", "inline-block");
   const $episodesList = $("#episodesList");
-  // $episodesArea.empty();
+  $episodesList.empty();
 
   for (const episode of episodes) {
-      const episodeLi = $("<li>").text(`${episode.name}`);
+      const episodeLi = $("<li>").text(`${episode.name} (season ${episode.season}, number ${episode.number})`);
       $episodesList.append(episodeLi);
-  //   const $episode = $(`
-  //   <div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
-  //    <div class="media">
-  //      <img
-  //         src="${show.image}"
-  //         alt="${show.name}"
-  //         class="w-25 me-3">
-  //      <div class="media-body">
-  //        <h5 class="text-primary">${show.name}</h5>
-  //        <div><small>${show.summary}</small></div>
-  //        <button class="btn btn-outline-light btn-sm Show-getEpisodes">
-  //          Episodes
-  //        </button>
-  //      </div>
-  //    </div>
-  //  </div>
-  // `);
-
-  //   $episodesArea.append($episode);
   };
 }
 
 // add other functions that will be useful / match our structure & design
 
+/** Takes show id and displays episodes in the DOM. */
+
 async function getAndDisplayEpisodesOfShow(id) {
   const episodes = await getEpisodesOfShow(id);
   displayEpisodes(episodes);
 }
+
+/** Finds show id and displays episodes in the DOM on button click. */
+
+$showsList.on("click", ".Show-getEpisodes", (evt) => {
+  const $showDiv = $(evt.target).closest(".show-container");
+  const showId = $showDiv.data("show-id");
+  getAndDisplayEpisodesOfShow(showId);
+});
