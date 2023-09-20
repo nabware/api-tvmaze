@@ -14,10 +14,13 @@ const $searchForm = $("#searchForm");
 
 async function getShowsByTerm(query) {
   const params = new URLSearchParams({q: query});
-  const response = await fetch(`http://api.tvmaze.com/search/shows${params}`);
+  const response = await fetch(`http://api.tvmaze.com/search/shows?${params}`);
+  const responseObj = await response.json();
   const shows = [];
 
-  for (let {id, name, summary, image} of response.show) {
+  console.log(responseObj)
+
+  for (let {id, name, summary, image} of responseObj.show) {
     shows.push({id, name, summary, image: "https://tinyurl.com/tv-missing"});
   }
 
