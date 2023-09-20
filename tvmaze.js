@@ -23,9 +23,9 @@ async function getShowsByTerm(query) {
   console.log(data);
 
   const shows = data.map(show => {
-              let { id, name, summary, image } = show.show;
+    let { id, name, summary, image } = show.show;
 
-              return { id, name, summary, image: (image?.original || MISSING_IMAGE) };
+    return { id, name, summary, image: (image?.original || MISSING_IMAGE) };
 
   });
 
@@ -90,10 +90,53 @@ $searchForm.on("submit", async function handleSearchForm(evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) {
+  const response = await fetch(`${BASE_URL}/shows/${id}/episodes`);
+  const data = await response.json();
 
-/** Write a clear docstring for this function... */
+  return data.map(episode => {
+    const { id, name, season, number } = episode;
+    return { id, name, season, number };
+  });
+}
 
-// function displayEpisodes(episodes) { }
+/** Takes in an array of episodes,
+ * and populates the DOM.
+ */
+
+function displayEpisodes(episodes) {
+  $episodesArea.css("display", "inline-block");
+  const $episodesList = $("#episodesList");
+  // $episodesArea.empty();
+
+  for (const episode of episodes) {
+      const episodeLi = $("<li>").text(`${episode.name}`);
+      $episodesList.append(episodeLi);
+  //   const $episode = $(`
+  //   <div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+  //    <div class="media">
+  //      <img
+  //         src="${show.image}"
+  //         alt="${show.name}"
+  //         class="w-25 me-3">
+  //      <div class="media-body">
+  //        <h5 class="text-primary">${show.name}</h5>
+  //        <div><small>${show.summary}</small></div>
+  //        <button class="btn btn-outline-light btn-sm Show-getEpisodes">
+  //          Episodes
+  //        </button>
+  //      </div>
+  //    </div>
+  //  </div>
+  // `);
+
+  //   $episodesArea.append($episode);
+  };
+}
 
 // add other functions that will be useful / match our structure & design
+
+async function getAndDisplayEpisodesOfShow(id) {
+  const episodes = await getEpisodesOfShow(id);
+  displayEpisodes(episodes);
+}
